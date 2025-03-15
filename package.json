@@ -1,0 +1,28 @@
+{
+  "name": "bogai-server",
+  "version": "1.0.0",
+  "description": "BlogAI Backend Server",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cheerio": "^1.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "google-trends-api": "^4.9.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.1.0",
+    "morgan": "^1.10.0",
+    "openai": "^4.86.2",
+    "rss-parser": "^3.13.0",
+    "twitter-api-v2": "^1.15.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
