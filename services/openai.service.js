@@ -2,6 +2,7 @@ const OpenAI = require('openai');
 const cheerio = require('cheerio');
 
 const openai = new OpenAI({
+  baseURL: 'https://api.deepseek.com',
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -365,7 +366,7 @@ Return ONLY the complete expanded article with all sections fully developed. The
 `;
 
       const expansion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "deepseek-chat",
         messages: [
           { 
             role: "system", 
@@ -397,7 +398,7 @@ Return the COMPLETE article with new sections added. The final article should be
 `;
         
         const altExpansion = await openai.chat.completions.create({
-          model: "gpt-4",
+          model: "deepseek-chat",
           messages: [{ role: "user", content: alternativePrompt }],
           temperature: 0.7,
           max_tokens: Math.min(4000, wordsToAdd * 10),
@@ -498,7 +499,7 @@ Write the article now, focusing on quality and proper structure.`;
           console.log(`Content generation attempt ${attempt}/${retries}`);
           
           const completion = await openai.chat.completions.create({
-            model: "gpt-4",
+            model: "deepseek-chat",
             messages: [
               { 
                 role: "system", 
