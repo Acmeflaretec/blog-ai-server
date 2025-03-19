@@ -3,8 +3,10 @@ const Business = require('../models/business.model');
 
 exports.getTrends = async (req, res) => {
   try {
-    // Get user's business context
-    const business = await Business.findOne({ userId: req.user.userId });
+    // Get complete business profile with all fields
+    const business = await Business.findOne({ userId: req.user.userId })
+      .select('-__v')
+      .lean();
     
     if (!business) {
       return res.status(404).json({ 
@@ -13,25 +15,34 @@ exports.getTrends = async (req, res) => {
       });
     }
 
-    // Construct business context
+    // Construct comprehensive business context
     const businessContext = {
       industry: business.industry,
       targetAudience: business.targetAudience,
-      region: business.region || 'US'
+      businessName: business.businessName,
+      region: business.region || 'US',
+      keywords: business.primaryKeywords
     };
 
-    // Validate business context
-    if (!businessContext.industry || !businessContext.targetAudience) {
+    // Validate essential business context
+    const requiredFields = ['industry', 'targetAudience', 'businessName'];
+    const missingFields = requiredFields.filter(field => !businessContext[field]);
+
+    if (missingFields.length > 0) {
       return res.status(400).json({ 
-        message: 'Business profile is incomplete. Please fill in the industry and target audience.',
+        message: 'Business profile is incomplete. Please fill in all required fields.',
         success: false,
-        requiredFields: ['industry', 'targetAudience']
+        requiredFields: missingFields
       });
     }
 
-    console.log('Fetching trends with business context:', businessContext);
+    console.log('Fetching trends with business context:', {
+      ...businessContext,
+      // Exclude potentially sensitive data from logs
+      keywords: '[FILTERED]'
+    });
 
-    // Get trending topics based on business context
+    // Get trending topics based on comprehensive business context
     const trends = await getTrendingTopics(businessContext);
 
     if (!trends || trends.length === 0) {
