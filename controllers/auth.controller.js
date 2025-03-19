@@ -12,10 +12,10 @@ const generateToken = (userId) => {
 // Set cookie with token
 const setTokenCookie = (res, token) => {
   res.cookie("auth-token", token, {
-    httpOnly: false,
-    sameSite: "None",
+    httpOnly: true,
+    sameSite: "Lax",
     secure: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   });
 };
@@ -61,14 +61,7 @@ exports.login = async (req, res) => {
     const token = generateToken(user._id);
     setTokenCookie(res, token);
 
-    res.json({
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
-      needsOnboarding: user.needsOnboarding,
-    });
+    res.json({ user });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Error logging in" });

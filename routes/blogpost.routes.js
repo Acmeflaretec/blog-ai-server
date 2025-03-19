@@ -10,7 +10,7 @@ router.use(protect);
 router.post('/', blogPostController.createPost);
 
 // Get all posts for the authenticated user
-router.get('/user', blogPostController.getUserPosts);
+router.get('/', blogPostController.getAllPosts);
 
 // Get a single post
 router.get('/:id', blogPostController.getPost);

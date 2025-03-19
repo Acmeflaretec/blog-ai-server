@@ -1,107 +1,153 @@
-const BlogPost = require('../models/blogpost.model');
+const BlogPost = require("../models/blogpost.model");
 
 // Create a new blog post
 exports.createPost = async (req, res) => {
   try {
-    const { title, content, tags, featuredImage, status } = req.body;
+    const {
+      title,
+      metaTitle,
+      description,
+      keywords,
+      content,
+      tags,
+      featuredImage,
+      status,
+      slug,
+      wordCount,
+    } = req.body;
     const userId = req.user.userId;
 
-    const blogPost = new BlogPost({
+    // Handle both array and string inputs for tags and keywords
+    const tagsArray = Array.isArray(tags) 
+      ? tags 
+      : tags ? tags.split(",").map((tag) => tag.trim()) : [];
+    
+    const keywordsArray = Array.isArray(keywords)
+      ? keywords
+      : keywords ? keywords.split(",").map((keyword) => keyword.trim()) : [];
+
+    const post = new BlogPost({
       userId,
       title,
+      metaTitle,
+      description,
+      keywords: keywordsArray,
       content,
-      tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+      tags: tagsArray,
       featuredImage,
-      status: status || 'draft'
+      status,
+      slug,
+      wordCount,
     });
 
-    await blogPost.save();
-
-    res.status(201).json({
-      message: 'Blog post created successfully',
-      blogPost
-    });
+    await post.save();
+    res.status(201).json({ post });
   } catch (error) {
-    console.error('Create blog post error:', error);
-    res.status(500).json({ message: 'Error creating blog post' });
+    console.error("Error creating post:", error);
+    res.status(500).json({ error: "Failed to create blog post" });
   }
 };
 
-// Get all blog posts for a user
-exports.getUserPosts = async (req, res) => {
+// Get all blog posts
+exports.getAllPosts = async (req, res) => {
   try {
-    const userId = req.user.userId;
-    const posts = await BlogPost.find({ userId })
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({ posts });
+    const { userId } = req.user;
+    const posts = await BlogPost.find({ userId }).sort({ createdAt: -1 });
+    res.json({ posts });
   } catch (error) {
-    console.error('Get user posts error:', error);
-    res.status(500).json({ message: 'Error fetching blog posts' });
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ error: "Failed to fetch blog posts" });
   }
 };
 
 // Get a single blog post
 exports.getPost = async (req, res) => {
   try {
-    const post = await BlogPost.findById(req.params.id);
+    const post = await BlogPost.findOne({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
+
     if (!post) {
-      return res.status(404).json({ message: 'Blog post not found' });
+      return res.status(404).json({ error: "Blog post not found" });
     }
 
-    res.status(200).json({ post });
+    res.json({ post });
   } catch (error) {
-    console.error('Get post error:', error);
-    res.status(500).json({ message: 'Error fetching blog post' });
+    console.error("Error fetching post:", error);
+    res.status(500).json({ error: "Failed to fetch blog post" });
   }
 };
 
 // Update a blog post
 exports.updatePost = async (req, res) => {
   try {
-    const { title, content, tags, featuredImage, status } = req.body;
-    const userId = req.user.userId;
+    const {
+      title,
+      metaTitle,
+      description,
+      keywords,
+      content,
+      tags,
+      featuredImage,
+      status,
+    } = req.body;
 
-    const post = await BlogPost.findOne({ _id: req.params.id, userId });
-    if (!post) {
-      return res.status(404).json({ message: 'Blog post not found' });
-    }
+    // Convert tags and keywords strings to arrays if they're provided
+    const tagsArray = tags ? tags.split(",").map((tag) => tag.trim()) : [];
+    const keywordsArray = keywords
+      ? keywords.split(",").map((keyword) => keyword.trim())
+      : [];
 
-    const updatedPost = await BlogPost.findByIdAndUpdate(
-      req.params.id,
+    // Generate slug from title
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    const post = await BlogPost.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.userId },
       {
         title,
+        metaTitle,
+        description,
+        keywords: keywordsArray,
         content,
-        tags: tags ? tags.split(',').map(tag => tag.trim()) : post.tags,
-        featuredImage: featuredImage || post.featuredImage,
-        status: status || post.status
+        tags: tagsArray,
+        featuredImage,
+        status,
+        slug,
+        updatedAt: new Date(),
       },
       { new: true }
     );
 
-    res.status(200).json({
-      message: 'Blog post updated successfully',
-      blogPost: updatedPost
-    });
+    if (!post) {
+      return res.status(404).json({ error: "Blog post not found" });
+    }
+
+    res.json({ post });
   } catch (error) {
-    console.error('Update post error:', error);
-    res.status(500).json({ message: 'Error updating blog post' });
+    console.error("Error updating post:", error);
+    res.status(500).json({ error: "Failed to update blog post" });
   }
 };
 
 // Delete a blog post
 exports.deletePost = async (req, res) => {
   try {
-    const userId = req.user.userId;
-    const post = await BlogPost.findOneAndDelete({ _id: req.params.id, userId });
+    const post = await BlogPost.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
 
     if (!post) {
-      return res.status(404).json({ message: 'Blog post not found' });
+      return res.status(404).json({ error: "Blog post not found" });
     }
 
-    res.status(200).json({ message: 'Blog post deleted successfully' });
+    res.json({ message: "Blog post deleted successfully" });
   } catch (error) {
-    console.error('Delete post error:', error);
-    res.status(500).json({ message: 'Error deleting blog post' });
+    console.error("Error deleting post:", error);
+    res.status(500).json({ error: "Failed to delete blog post" });
   }
-}; 
+};
