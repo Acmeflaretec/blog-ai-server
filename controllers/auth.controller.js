@@ -11,10 +11,12 @@ const generateToken = (userId) => {
 
 // Set cookie with token
 const setTokenCookie = (res, token) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  
   res.cookie("auth-token", token, {
     httpOnly: true,
     sameSite: "Lax",
-    secure: true,
+    secure: isProduction,
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/",
   });
