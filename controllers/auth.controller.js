@@ -2,7 +2,7 @@ const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-const TOKEN_EXPIRY = "7d";
+const TOKEN_EXPIRY = "1d";
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -12,12 +12,12 @@ const generateToken = (userId) => {
 // Set cookie with token
 const setTokenCookie = (res, token) => {
   const isProduction = process.env.NODE_ENV === "production";
-  
+
   res.cookie("auth-token", token, {
-    httpOnly: true,
+    httpOnly: false,
     sameSite: "Lax",
     secure: isProduction,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 24 * 60 * 60 * 1000,
     path: "/",
     domain: process.env.DOMAIN,
   });

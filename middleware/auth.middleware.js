@@ -7,7 +7,7 @@ exports.protect = async (req, res, next) => {
     const token = req.cookies['auth-token'];
     
     if (!token) {
-      return res.status(401).json({ message: 'Not authenticated' });
+      return res.status(401).json({ message: 'Invalid token' });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
@@ -15,6 +15,6 @@ exports.protect = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    res.status(401).json({ message: 'Not authenticated' });
+    res.status(401).json({ message: 'Invalid token' });
   }
 }; 
