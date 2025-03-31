@@ -14,6 +14,9 @@ const trendingRoutes = require("./routes/trending.routes");
 const morgan = require("morgan");
 const { authenticate } = require("./middleware/user.middleware");
 const blogPostController = require("./controllers/blogpost.controller");
+const adminRoutes = require('./routes/admin.routes');
+const subscriptionRoutes = require('./routes/subscription.routes');
+const scraperRoutes = require('./routes/scraper.routes');
 
 const app = express();
 
@@ -62,6 +65,9 @@ app.use("/api/trends", trendsRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/trending", trendingRoutes);
 app.use("/api/user", userRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/scraper', scraperRoutes);
 app.get("/api/blogs", authenticate, blogPostController.getAllPosts);
 
 // Configure MongoDB connection with timeouts

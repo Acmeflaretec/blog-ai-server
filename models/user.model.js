@@ -26,6 +26,15 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    subscriptionPlan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+    },
+    status: {
+      type: String,
+      enum: ["Active" | "Inactive" | "Pending" | "Suspended"],
+      default: "Pending",
+    },
   },
   {
     timestamps: true,

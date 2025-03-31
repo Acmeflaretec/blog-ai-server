@@ -4,7 +4,7 @@ const Business = require('../models/business.model');
 exports.researchContent = async (req, res) => {
   try {
     console.log('Received research request:', req.body);
-    const { topic, wordCount = 800 } = req.body;
+    const { topic, wordCount = 800, existingContent, customPrompt } = req.body;
     const userId = req.user.userId;
 
     if (!topic) {
@@ -32,7 +32,9 @@ exports.researchContent = async (req, res) => {
       userId,
       businessId: business._id,
       industry: business.industry,
-      hasKeywords: !!business.primaryKeywords
+      hasKeywords: !!business.primaryKeywords,
+      hasExistingContent: !!existingContent,
+      hasCustomPrompt: !!customPrompt
     });
 
     // Ensure business has required fields
@@ -50,7 +52,13 @@ exports.researchContent = async (req, res) => {
     };
 
     console.log('Generating content suggestion...');
-    const result = await generateContentSuggestion(topic, businessContext, validatedWordCount);
+    const result = await generateContentSuggestion(
+      topic, 
+      businessContext, 
+      validatedWordCount,
+      existingContent,
+      customPrompt
+    );
     
     // Validate the result structure
     if (!result || typeof result !== 'object') {
